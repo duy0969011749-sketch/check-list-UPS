@@ -1,0 +1,632 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d5f73"></head><body><title>Checklist đóng điện UPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: ứng dụng 1 màn hình — thanh trên (tiến độ), nội dung cuộn, thanh dưới (điều hướng) */
+:root{
+  --bg:#eef1f0; --surface:#ffffff; --ink:#15211f; --muted:#5b6b68; --line:#d3dbd9;
+  --accent:#0d5f73; --accent-ink:#ffffff; --accent-soft:#dcecef;
+  --ok:#1d7a3e; --ok-soft:#dff1e5; --bad:#b42318; --bad-soft:#fbe4e1; --warn:#9a6200; --warn-soft:#fbefd6; --na:#64706e; --na-soft:#e7ebea;
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1716; --surface:#172220; --ink:#e6eeec; --muted:#9aaba7; --line:#2b3a37;
+  --accent:#5cb6cc; --accent-ink:#06191e; --accent-soft:#163239;
+  --ok:#5fcf86; --ok-soft:#143021; --bad:#ff8a7d; --bad-soft:#3a1714; --warn:#f0b54d; --warn-soft:#352812; --na:#a3b0ad; --na-soft:#24302e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1716; --surface:#172220; --ink:#e6eeec; --muted:#9aaba7; --line:#2b3a37;
+  --accent:#5cb6cc; --accent-ink:#06191e; --accent-soft:#163239;
+  --ok:#5fcf86; --ok-soft:#143021; --bad:#ff8a7d; --bad-soft:#3a1714; --warn:#f0b54d; --warn-soft:#352812; --na:#a3b0ad; --na-soft:#24302e; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);overflow:hidden;-webkit-tap-highlight-color:transparent}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr auto;max-width:640px;margin:0 auto;background:var(--bg)}
+/* top bar */
+.top{padding:10px 16px 8px;display:grid;gap:8px;border-bottom:1px solid var(--line);background:var(--surface)}
+.top-row{display:flex;align-items:center;gap:10px}
+.icon-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;height:36px;padding:0 12px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.step-count{font-family:var(--f-display);font-size:20px;font-weight:700;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.step-count small{color:var(--muted);font-size:16px}
+.saved{margin-left:auto;font-size:12px;color:var(--muted)}
+.bar{height:5px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .25s}
+/* main */
+main{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 16px 28px;display:flex;flex-direction:column;gap:18px}
+
+main>*{flex-shrink:0}
+.eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.head{display:grid;gap:4px}
+.code{font-family:var(--f-display);font-weight:700;font-size:44px;line-height:1;color:var(--muted);font-variant-numeric:tabular-nums}
+h1{margin:0;font-size:22px;line-height:1.3;font-weight:700;text-wrap:balance}
+h2{margin:0;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.block{display:grid;gap:10px}
+.crit{display:grid;gap:8px}
+.crit-box{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px}
+.tag{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:4px;margin-bottom:6px}
+.tag.ok{background:var(--ok-soft);color:var(--ok)} .tag.bad{background:var(--bad-soft);color:var(--bad)}
+.crit-box ul{margin:0;padding-left:18px;display:grid;gap:3px;font-size:14px}
+.req{display:flex;gap:10px;align-items:flex-start;background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:14px}
+.req b{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);white-space:nowrap;padding-top:2px}
+.req span{white-space:pre-line;font-weight:500}
+.hint{font-size:13px;color:var(--muted);white-space:pre-line}
+label.f{display:grid;gap:5px;font-size:13px;font-weight:600;color:var(--muted)}
+label.f em{color:var(--bad);font-style:normal}
+.inp,textarea.inp,select.inp{width:100%;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:11px 12px;font-size:16px;font-weight:500;color:var(--ink)}
+textarea.inp{min-height:84px;resize:vertical}
+.inp.err{border-color:var(--bad)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pos{display:grid;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px}
+.pos-t{font-weight:600;font-size:14px}
+.pos-d{font-size:12.5px;color:var(--muted)}
+.mini{font-size:11px;color:var(--muted);font-weight:600}
+.cell{display:grid;gap:3px}
+.cell .inp{padding:9px 8px;text-align:center;font-variant-numeric:tabular-nums}
+.inp.out{border-color:var(--bad);background:var(--bad-soft)}
+.inp.in{border-color:var(--ok)}
+.ovl-row{display:grid;grid-template-columns:76px minmax(0,1fr) auto auto;gap:6px;align-items:center}
+.ovl-row .lab{font-weight:600;font-size:14px;font-variant-numeric:tabular-nums}
+.ovl-row .inp{padding:8px 10px;font-size:15px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:6px;height:38px;padding:0 10px;font-size:12.5px;font-weight:700}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.ovl-group{display:grid;gap:6px}
+.ovl-group h3{margin:6px 0 0;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em}
+.vals{display:flex;flex-wrap:wrap;gap:5px}
+.v{font-size:12.5px;padding:3px 7px;border-radius:5px;background:var(--na-soft);font-variant-numeric:tabular-nums}
+.v.out{background:var(--bad-soft);color:var(--bad);font-weight:700}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 12px;font-weight:500;font-size:14px}
+.checks input{width:18px;height:18px;accent-color:var(--accent)}
+/* verdict */
+.verdict{display:grid;gap:10px;border-top:1px solid var(--line);padding-top:16px}
+.auto{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}
+.pill{display:inline-flex;align-items:center;font-weight:700;font-size:13px;letter-spacing:.04em;padding:5px 12px;border-radius:999px;text-transform:uppercase}
+.pill.dat{background:var(--ok-soft);color:var(--ok)} .pill.kdat{background:var(--bad-soft);color:var(--bad)}
+.pill.na{background:var(--na-soft);color:var(--na)} .pill.cho{background:var(--warn-soft);color:var(--warn)}
+.auto-why{color:var(--muted);font-size:13px;flex-basis:100%}
+.seg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.seg button{height:52px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:15px}
+.seg button[data-v="dat"].on{background:var(--ok);border-color:var(--ok);color:#fff}
+.seg button[data-v="kdat"].on{background:var(--bad);border-color:var(--bad);color:#fff}
+.seg button[data-v="na"].on{background:var(--na);border-color:var(--na);color:var(--surface)}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font-weight:600;font-size:13px;text-decoration:underline;text-underline-offset:3px;justify-self:start}
+/* photos */
+.ph-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{height:46px;border-radius:10px;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);font-weight:700;font-size:14.5px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 14px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{border-color:var(--line);color:var(--ink)}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.5}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+label.btn{cursor:pointer;user-select:none;-webkit-user-select:none}
+.ph-item{display:grid;gap:4px;min-width:0}
+.ph-name{font-size:12px;font-weight:600;color:var(--muted);text-align:center;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.thumbs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.thumb{position:relative;aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:var(--na-soft);max-width:100%}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb button{position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-weight:700;font-size:15px;line-height:1}
+.empty-ph{font-size:13px;color:var(--muted)}
+/* bottom */
+.bottom{display:grid;grid-template-columns:1fr 1.4fr;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--surface)}
+.bottom .btn{height:52px;font-size:16px}
+/* summary */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.stat{border-radius:10px;padding:10px 8px;text-align:center;display:grid;gap:2px}
+.stat b{font-family:var(--f-display);font-size:32px;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:11.5px;font-weight:600}
+.stat.dat{background:var(--ok-soft);color:var(--ok)} .stat.kdat{background:var(--bad-soft);color:var(--bad)}
+.stat.na{background:var(--na-soft);color:var(--na)} .stat.cho{background:var(--warn-soft);color:var(--warn)}
+.list{display:grid;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.list button{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:8px;align-items:center;text-align:left;padding:11px 12px;border:0;border-bottom:1px solid var(--line);background:none;font-size:14px}
+.list button:last-child{border-bottom:0}
+.list .c{font-family:var(--f-display);font-weight:700;font-size:17px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.dot.dat{background:var(--ok)} .dot.kdat{background:var(--bad)} .dot.na{background:var(--na)} .dot.cho{background:var(--warn)}
+/* drawer */
+.drawer{position:fixed;inset:0;z-index:20;display:flex}
+.drawer .scrim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.drawer .panel{position:relative;margin-left:auto;width:min(92vw,420px);height:100%;background:var(--bg);display:grid;grid-template-rows:auto 1fr;padding-top:env(safe-area-inset-top,0px)}
+.drawer .ph{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface)}
+.drawer .pb{overflow-y:auto;padding:12px 16px 24px;display:grid;gap:14px;align-content:start}
+.drawer .list button.cur{background:var(--accent-soft)}
+.modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:16px}
+.modal .scrim{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+.modal .box{position:relative;background:var(--surface);border-radius:14px;padding:18px;display:grid;gap:12px;max-width:380px;width:100%}
+.modal .box p{margin:0;font-size:14px;color:var(--muted)}
+.modal .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.viewer{position:fixed;inset:0;z-index:40;background:#000;display:grid;place-items:center}
+.viewer img{max-width:100%;max-height:100%}
+.viewer button{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;font-weight:500;z-index:50;max-width:calc(100% - 32px)}
+.note-warn{background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:10px 12px;font-size:13.5px;font-weight:500}
+@media (prefers-reduced-motion:reduce){.bar>i{transition:none}}
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="top-row">
+      <span class="step-count" id="stepCount"></span>
+      <span class="saved" id="saved"></span>
+      <button class="icon-btn" id="btnMenu" type="button" aria-label="Danh sách hạng mục">Danh sách</button>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+  </header>
+  <main id="main"></main>
+  <nav class="bottom">
+    <button class="btn ghost" id="btnPrev" type="button">Trước</button>
+    <button class="btn primary" id="btnNext" type="button">Tiếp</button>
+  </nav>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script>
+(function(){
+"use strict";
+/* ===================== DỮ LIỆU CHECKLIST (theo file Excel) ===================== */
+const DOC_TITLE = "CHECKLIST KIỂM TRA NỘI BỘ TRƯỚC KHI NGHIỆM THU VÀ ĐÓNG ĐIỆN UPS";
+const SECTIONS = {A:"A. HỒ SƠ", B:"B. ĐIỀU KIỆN PHÒNG ĐẶT UPS VÀ ẮC QUY", C:"C. NGOẠI QUAN", F:"F. HỆ THỐNG ẮC QUY VRLA"};
+const ITEMS = [
+ {sec:"A",title:"Bản vẽ sơ đồ 1 sợi SLD được phê duyệt",pass:["Có bản vẽ sơ đồ 1 sợi SLD"],fail:["Không có bản vẽ sơ đồ 1 sợi SLD"],type:"manual"},
+ {sec:"A",title:"Bản vẽ bố trí thiết bị được phê duyệt",pass:["Có bản vẽ bố trí thiết bị"],fail:["Không có bản vẽ bố trí thiết bị"],type:"manual"},
+ {sec:"A",title:"Kịch bản kiểm tra nghiệm thu được phê duyệt",pass:["Có kịch bản kiểm tra nghiệm thu"],fail:["Không có kịch bản kiểm tra nghiệm thu"],type:"manual"},
+
+ {sec:"B",title:"Mặt sàn đặt thiết bị",pass:["Thiết bị được căn chỉnh cân bằng trên mặt phẳng.","Không có dấu hiệu sụt lún quanh chân thiết bị.","Thiết bị được cố định xuống sàn hoặc chân tăng chỉnh đã hạ chạm sàn hoặc bánh xe đã được khóa.","Không đọng nước, không vết nước loang trên sàn."],fail:["Thiết bị không cân bằng trên mặt phẳng, có dấu hiệu nghiêng, xô lệch, dễ dàng bị xô lệch.","Có dấu hiệu sụt lún quanh chân thiết bị.","Thiết bị chưa được cố định xuống sàn hoặc chân tăng chỉnh chưa được hạ chạm sàn hoặc bánh xe chưa được khóa.","Không đọng nước, không vết nước loang trên sàn."],type:"manual"},
+ {sec:"B",title:"Phía trên thiết bị",pass:["Không có ống nước, ống thoát nước máy lạnh chạy ngay trên thiết bị, nếu bắt buộc có thì phải có khay hứng nước.","Trần khô, sạch.","Trên nóc thiết bị không có dị vật.","Khoảng cách từ nóc thiết bị đến trần hoặc đáy máng cáp phía trên tối thiểu 300mm"],fail:["Ống nước, ống thoát nước máy lạnh chạy ngay trên thiết bị nhưng không có khay hứng nước.","Trần bị ướt, có nhiều bụi bẩn bám,","Dị vật phía trên nóc thiết bị chưa được loại bỏ.","Khoảng cách từ nóc thiết bị đến trần hoặc đáy máng cáp phía trên nhỏ hơn 300mm"],type:"manual"},
+ {sec:"B",title:"Phía trước thiết bị",pass:["Khoảng cách từ mặt trước thiết bị đến vật cản gần nhất tối thiểu bằng với khuyến cáo của hãng.","Đối với tủ điện hoặc tủ ắc quy khoảng cách tối thiểu 600mm."],fail:["Khoảng cách từ mặt trước thiết bị đến vật cản gần nhất nhỏ hơn so với khuyến cáo của hãng.","Đối với tủ điện hoặc tủ ắc quy khoảng cách tối thiểu 600mm."],type:"manual"},
+ {sec:"B",title:"Phía sau lưng thiết bị",pass:["Khoảng cách từ phía sau lưng thiết bị đến vật cản gần nhất tối thiểu bằng với khuyến cáo của hãng."],fail:["Khoảng cách từ phía sau lưng thiết bị đến vật cản gần nhất nhỏ hơn so với khuyến cáo của hãng."],type:"manual"},
+ {sec:"B",title:"Phía bên hông thiết bị",pass:["Khoảng cách từ mặt trước thiết bị đến vật cản gần nhất tối thiểu bằng với khuyến cáo của hãng."],fail:["Khoảng cách từ mặt trước thiết bị đến vật cản gần nhất nhỏ hơn so với khuyến cáo của hãng."],type:"manual"},
+ {sec:"B",title:"Bụi xây dựng",pass:["Phòng sạch sẽ, bụi xi măng được kiểm soát.","Không có bụi khoan, mạt kim loại trong phòng và trên thiết bị.","Phòng không còn thi công các hạng mục khác."],fail:["Phòng có nhiều bụi xi măng và không được kiểm soát.","Có bụi khoan, mạt kim loại trong phòng và trên thiết bị.","Phòng đang thi công các hạng mục khác"],type:"manual"},
+ {sec:"B",title:"Độ ẩm",pass:["Độ ẩm trong dải khuyến cáo của hãng.","Không có dấu hiệu đọng sương, tụ nước"],fail:["Độ ẩm ngoài dải khuyến cáo của hãng.","Có dấu hiệu đọng sương, tụ nước."],req:"Trong dải: 0 - 95%",type:"single",unit:"%",label:"Độ ẩm đo được",min:0,max:95},
+ {sec:"B",title:"Thiết bị HVAC",pass:["Hoạt động ổn định duy trì nhiệt độ phòng theo mức cài đặt"],fail:["Không duy trì hoạt động liên tục","Không duy trì nhiệt độ phòng theo mức cài đặt, sai số so với cài đặt và thực tế vượt quá 3 độ C"],req:"|T đo − T cài đặt| ≤ 3 °C",type:"hvac",tol:3,
+   pos:[["Vị trí 1","Cách HVAC 0.5m"],["Vị trí 2","Vị trí thiết bị"],["Vị trí 3","Điểm trong phòng cách xa HVAC nhất"]],note:"Mỗi lần đo cách nhau 10 - 15 phút"},
+ {sec:"B",title:"Nhiệt độ xung quanh UPS",pass:["Nhiệt độ trong dải khuyến cáo của hãng."],fail:["Nhiệt độ ngoài dải khuyến cáo của hãng."],req:"Trong dải: 0 - 40 độ C",type:"range",min:0,max:40,
+   pos:[["Vị trí 1","Vị trí gần nhất từ HVAC đến UPS"],["Vị trí 2","Vị trí xa nhất từ HVAC đến UPS"]],note:"Mỗi lần đo cách nhau 10 - 15 phút"},
+ {sec:"B",title:"Nhiệt độ xung quanh Ắc quy",pass:["Nhiệt độ trong dải khuyến cáo của hãng.","Chênh lệch nhiệt độ giữa các bình trên cùng 1 hệ không quá 3 độ C"],fail:["Nhiệt độ ngoài dải khuyến cáo của hãng."],req:"Trong dải: 18 - 25 độ C",type:"range",min:18,max:25,
+   pos:[["Vị trí 1","Vị trí gần nhất từ HVAC đến ắc quy"],["Vị trí 2","Vị trí xa nhất từ HVAC đến ắc quy"]],note:"Mỗi lần đo cách nhau 10 - 15 phút"},
+ {sec:"B",title:"Nhiệt độ ắc quy",pass:["Chênh lệch nhiệt độ giữa các bình trên cùng 1 hệ không vượt quá 3 độ C"],fail:["Chênh lệch nhiệt độ giữa các bình trên cùng 1 hệ vượt quá 3 độ C"],req:"∆T ≤ 3 độ C",type:"deltaT",tol:3},
+
+ {sec:"C",title:"Phần thân UPS",pass:["Không có dấu hiệu móp méo do ngoại lực."],fail:["Có dấu hiệu móp méo rõ ràng"],type:"manual"},
+ {sec:"C",title:"Mùi hương và dấu hiệu hư hỏng",pass:["Không mùi khét linh kiện điện tử đặc trưng","Không vết cháy sém trên bảng mạch"],fail:["Có mùi khét linh kiện điện tử đặc trưng","Có vết cháy sém trên bảng mạch"],type:"manual"},
+ {sec:"C",title:"Màn hình và bảng điều khiển",pass:["Màn hình, đèn báo không nứt vỡ.","Nút bấm điều khiển có độ nảy cơ khí rõ ràng"],fail:["Màn hình, đèn báo bị nứt vỡ.","Nút bấm điều khiển không có độ nảy cơ khí rõ ràng."],type:"manual"},
+ {sec:"C",title:"Cửa trước",pass:["Cửa trước đóng kín và khóa được"],fail:["Cửa trước không đóng kín và khóa được.","Cửa bị cấn, va chạm với các bộ phận khác","Cửa bị hư bản lề","Cửa bị hư ổ khóa"],type:"manual"},
+ {sec:"C",title:"Tấm che và che đầu cáp",pass:["Đủ các tấm che, đã được bắt vít cố định."],fail:["Thiếu tấm che","Vị trí cáp vào ra chưa được che kín","Thiếu ốc/ vít cố định các tấm che"],type:"manual"},
+ {sec:"C",title:"Vị trí thông gió",pass:["Thông thoáng, không có vật che khuất","Đã bóc màng nilon, băng keo bảo vệ các vị trí thông gió"],fail:["Bị che khuất.","Chưa bóc màng nilon, băng keo bảo vệ các vị trí thông gió"],type:"manual"},
+ {sec:"C",title:"Lưới lọc bụi (nếu có)",pass:["Đã lắp đúng vị trí quy định của hãng.","Tình trạng sạch bụi."],fail:["Lắp sai vị trí quy định của hãng.","Tình trạng bám bụi, chưa được vệ sinh."],type:"manual"},
+ {sec:"C",title:"Giao thức truyền thông",pass:["Lắp đầy đủ theo YCKT của dự án"],fail:["Thiếu theo YCKT của dự án"],req:"- SNMP\n- Drycontact\n- Modbus RTU\n- Modbus TCP",type:"manual",checks:["SNMP","Drycontact","Modbus RTU","Modbus TCP"]},
+ {sec:"C",title:"Đầu Cosse",pass:["Đầu cosse không bị oxy hóa, còn mới","Đầu cosse phù hợp với cáp điện.","Vết lực bấm rõ ràng.","Cổ cosse có ống co nhiệt màu hoặc bọc cách điện."],fail:["Đầu cosse bị oxy hóa, ăn mòn lớp xi mạ","Đầu cosse to hơn hoặc nhỏ so với cáp điện.","Vết lực bấm không rõ ràng hoặc dấu bấm lại nhiều lần cùng 1 vị trí.","Cổ cosse không có ống co nhiệt màu hoặc bọc cách điện."],type:"manual"},
+ {sec:"C",title:"Vị trí siết lực đã được đánh dấu (marking)",pass:["Mỗi bu lông đã siết và có vạch màu đánh dấu."],fail:["Bu lông chưa được siết","Không có vạch màu đánh dấu vị trí đã siết"],type:"manual"},
+ {sec:"C",title:"Cáp điện không bị kéo căng",pass:["Cáp được đỡ tự nhiên, đầu cực không chịu lực kéo."],fail:["Đầu cực chịu lực kéo hoặc neo đỡ toàn bộ trọng lượng cáp."],type:"manual"},
+ {sec:"C",title:"Vỏ cáp",pass:["Không trầy, rách","Không cháy","Không bẹp."],fail:["Bị trầy, rách","Bị cháy","Bị bẹp"],type:"manual"},
+ {sec:"C",title:"Đánh dấu phân biệt định danh cáp điện",pass:["Cáp điện được đánh dấu rõ ràng dễ phân biệt và đúng theo thứ tự vị trí lắp đặt ở cả hai đầu."],fail:["Cáp điện không được đánh dấu rõ ràng dễ phân biệt","Thứ tự vị trí lắp đặt ở hai đầu cáp không đồng bộ"],type:"manual"},
+ {sec:"C",title:"Thiết bị đã được đấu tiếp địa (PE) khi không điện",pass:["Đã được kết nối, có dây PE.","Điện trở vỏ thiết bị đến PE hệ thống tại tủ cấp nguồn không lớn hơn 3Ω"],fail:["Chưa được kết nối, thiếu có dây PE.","Điện trở vỏ thiết bị đến PE hệ thống tại tủ cấp nguồn lớn hơn 3Ω"],req:"R ≤ 3Ω",type:"single",unit:"Ω",label:"R vỏ thiết bị – PE",max:3},
+ {sec:"C",title:"Đo kiểm thông mạch khi không điện",pass:["Mọi tổ hợp đo điện trở đều không có giá trị OVL, nếu là giá trị số nguyên cần kiểm tra tính tương đồng giữa các tổ hợp còn lại"],fail:["Có ít nhất 1 tổ hợp đo điện trở có giá trị 0","Có tổ hợp có giá trị số nguyên khác 0 và khác các tổ hợp còn lại"],
+   req:"R Lx-N: OVL\nR Lx-PE: OVL\nR Lx-Ly: OVL\nR Lx - Âm: OVL\nR Lx - Dương: OVL\nR âm-dương: OVL\nR âm-N: OVL (nếu có)\nR dương-N: OVL (nếu có)",type:"ovl",
+   groups:[["Pha – N",["L1-N","L2-N","L3-N"]],["Pha – PE",["L1-PE","L2-PE","L3-PE"]],["Pha – Pha",["L1-L2","L2-L3","L1-L3"]],["Pha – Âm",["L1-Âm","L2-Âm","L3-Âm"]],["Pha – Dương",["L1-Dương","L2-Dương","L3-Dương"]],["Một chiều",["Âm-Dương","Âm-N","Dương-N"]]]},
+ {sec:"C",title:"Tín hiệu trạng thái về UPS",pass:["Đã được kết nối theo hồ sơ bản vẽ thiết kế"],fail:["Chưa được kết nối theo hồ sơ bản vẽ thiết kế"],type:"manual"},
+
+ {sec:"F",title:"Ngoại quan bình ắc quy",pass:["Vỏ bình không phồng, nứt, rò chất lỏng, vết ố, mùi axit.","Cực không bị ăn mòn."],fail:["Vỏ bình bị phồng, nứt, rò chất lỏng, vết ố, mùi axit.","Cực bị ăn mòn."],type:"manual"},
+ {sec:"F",title:"Chủng loại",pass:["Khớp hồ sơ giao hàng và bản vẽ kỹ thuật đã trình duyệt"],fail:["Khác chủng loại trong hồ sơ giao hàng","Khác chủng loại trong bản vẽ kỹ thuật đã trình duyệt"],type:"manual"},
+ {sec:"F",title:"Số lượng, cấu hình mỗi chuỗi",pass:["Số bình mỗi chuỗi, số chuỗi khớp bản vẽ kỹ thuật đã trình duyệt"],fail:["Khác số bình so với bản vẽ kỹ thuật đã trình duyệt.","Khác số string so với bản vẽ kỹ thuật đã trình duyệt."],type:"manual"},
+ {sec:"F",title:"Điện áp hở mạch từng bình (trước khi nối vào UPS)",pass:["Mỗi bình có điện áp hở mạch nằm xấp xỉ nhau, sai số cho phép 10%."],fail:["Mỗi bình có điện áp hở mạch nằm xấp xỉ nhau, sai số lớn hơn 10%."],req:"Sai số ≤ 10%",type:"voltages",tol:10,note:"Nộp kèm report ắc quy VRLA"},
+ {sec:"F",title:"Cực tính",pass:["Cực tính tại cực trên và dưới thiết bị đóng cắt trùng nhau"],fail:["Cực tính tại cực trên và dưới thiết bị đóng cắt không trùng nhau"],type:"manual"},
+ {sec:"F",title:"Lực siết cực ắc quy",pass:["Cực và thanh nối đã siết đủ lực theo khuyến cáo của hãng"],fail:["Cực và thanh nối không siết đúng lực theo khuyến cáo của hãng"],req:"- Ốc M6: 5-6 N.m\n- Ốc M8: 8-9 N.m\n- Ốc M10: 20-25 N.m",type:"torque"},
+ {sec:"F",title:"Thanh nối/Cáp nối bình",pass:["Thanh nối/ Cáp nối bình không có dấu hiệu Oxy hóa."],fail:["Thanh nối/ Cáp nối bình có dấu hiệu Oxy hóa."],type:"manual"},
+ {sec:"F",title:"Che chắn cực và thanh nối",pass:["Cực ắc quy và thanh nối được che cách điện hoặc có nắp bảo vệ."],fail:["Cực ắc quy không được che chắn","Thanh nối không được che chắn"],type:"manual"},
+ {sec:"F",title:"Cảm biến nhiệt độ ắc quy",pass:["Hệ thống ắc quy được trang bị cảm biến nhiệt độ và kết nối về UPS."],fail:["Hệ thống ắc quy không được trang bị cảm biến nhiệt độ.","Cảm biến chưa được nối về UPS","Cảm biến thể hiện nhiệt độ phòng ắc quy không đúng hoặc sai số > 5 độ C"],type:"manual"}
+];
+const TORQUE = {M6:[5,6],M8:[8,9],M10:[20,25]};
+// đánh số lại theo từng phần
+(function(){const c={};ITEMS.forEach((it,i)=>{c[it.sec]=(c[it.sec]||0)+1;it.no=c[it.sec];it.id=it.sec+it.no;it.code=it.sec+"."+it.no;});})();
+
+const INFO_FIELDS = [
+ ["project","Tên dự án",true],["ups","Tên UPS",true],["model","Hãng / Model UPS",false],["serial","Số serial",false],
+ ["power","Công suất (kVA)",false],["location","Địa điểm / Phòng lắp đặt",false],["tech","Kỹ thuật viên kiểm tra",true]
+];
+const LABEL = {dat:"Đạt",kdat:"Không đạt",na:"N/A",cho:"Chưa kiểm"};
+
+/* ===================== TRẠNG THÁI ===================== */
+function blank(){const s={info:{},items:{},cur:0,created:Date.now()};ITEMS.forEach(it=>s.items[it.id]={vals:{},result:null,override:false,note:"",photos:[]});return s;}
+let S = blank();
+const TOTAL = ITEMS.length + 2; // info + items + tổng kết
+
+/* IndexedDB lưu nháp */
+const KV = {
+  db:null,
+  open(){ if(this.db) return Promise.resolve(this.db); return new Promise((res,rej)=>{ try{ const r=indexedDB.open("ups-checklist",1); r.onupgradeneeded=()=>r.result.createObjectStore("kv"); r.onsuccess=()=>{this.db=r.result;res(r.result)}; r.onerror=()=>rej(r.error);}catch(e){rej(e)} }); },
+  async get(k){ const db=await this.open(); return new Promise((res,rej)=>{ const q=db.transaction("kv").objectStore("kv").get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); },
+  async set(k,v){ const db=await this.open(); return new Promise((res,rej)=>{ const t=db.transaction("kv","readwrite"); t.objectStore("kv").put(v,k); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); }); },
+};
+let saveTimer=null;
+function save(){ clearTimeout(saveTimer); $("saved").textContent="Đang lưu…"; saveTimer=setTimeout(async()=>{ try{ await KV.set("state",S); $("saved").textContent="Đã lưu nháp "+hm(new Date()); }catch(e){ $("saved").textContent="Không lưu được nháp"; } },500); }
+
+/* ===================== TIỆN ÍCH ===================== */
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function num(v){ if(v==null) return null; const t=String(v).trim().replace(",","."); if(t==="") return null; const n=Number(t); return isFinite(n)?n:null; }
+function nums(text){ return String(text||"").split(/[\s;]+/).map(num).filter(n=>n!==null); }
+function fmt(n,d){ if(n==null) return ""; const r=Math.round(n*Math.pow(10,d==null?2:d))/Math.pow(10,d==null?2:d); return String(r).replace(".",","); }
+function pad(n){return String(n).padStart(2,"0")}
+function hm(d){return pad(d.getHours())+":"+pad(d.getMinutes())}
+function dmy(d){return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear()}
+function toast(msg){ const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2600); }
+
+/* ===================== ĐÁNH GIÁ TỰ ĐỘNG ===================== */
+// trả về {auto:'dat'|'kdat'|'review'|null, why:string, text:string (kết quả đo cho báo cáo)}
+function evaluate(it){
+  const st=S.items[it.id], v=st.vals;
+  if(it.type==="manual"){
+    let text=v.record||"";
+    if(it.checks){ const on=it.checks.filter(c=>v["chk_"+c]); if(on.length) text=("Có: "+on.join(", "))+(text?"\n"+text:""); }
+    return {auto:null,why:"",text};
+  }
+  if(it.type==="single"){
+    const n=num(v.x); if(n===null) return {auto:null,why:"Chưa nhập số đo.",text:""};
+    const okMin = it.min==null || n>=it.min, okMax = it.max==null || n<=it.max;
+    const ok=okMin&&okMax;
+    return {auto:ok?"dat":"kdat",why:ok?"Giá trị nằm trong yêu cầu.":"Giá trị ngoài yêu cầu ("+it.req+").",text:it.label+": "+fmt(n)+" "+it.unit};
+  }
+  if(it.type==="range"||it.type==="hvac"){
+    const sp = it.type==="hvac"? num(v.sp):null;
+    const lines=[]; let filled=0,total=0,bad=0;
+    if(it.type==="hvac") lines.push("T cài đặt: "+(sp===null?"—":fmt(sp)+" °C"));
+    it.pos.forEach((p,pi)=>{
+      const r=[]; for(let k=0;k<3;k++){ total++; const n=num(v["p"+pi+"_"+k]); if(n!==null){filled++; if(isOut(it,n,sp)) bad++;} r.push(n===null?"—":fmt(n)); }
+      lines.push(p[0]+": "+r.join(" / ")+" °C");
+    });
+    const text=lines.join("\n");
+    if(it.type==="hvac" && sp===null) return {auto:null,why:"Nhập nhiệt độ cài đặt của HVAC để tự kết luận.",text};
+    if(bad) return {auto:"kdat",why:bad+" lần đo ngoài yêu cầu.",text};
+    if(filled<total) return {auto:null,why:"Đã nhập "+filled+"/"+total+" lần đo.",text};
+    return {auto:"dat",why:"Tất cả "+total+" lần đo đạt yêu cầu.",text};
+  }
+  if(it.type==="deltaT"){
+    const a=nums(v.list); if(a.length<2) return {auto:null,why:"Nhập nhiệt độ ít nhất 2 bình.",text:a.length?("T: "+a.map(x=>fmt(x)).join("; ")+" °C"):""};
+    const mx=Math.max(...a), mn=Math.min(...a), d=mx-mn, ok=d<=it.tol+1e-9;
+    return {auto:ok?"dat":"kdat",why:"∆T = "+fmt(d)+" °C ("+(ok?"≤":">")+" "+it.tol+" °C).",text:a.length+" bình; Tmin "+fmt(mn)+" °C; Tmax "+fmt(mx)+" °C; ∆T = "+fmt(d)+" °C"};
+  }
+  if(it.type==="voltages"){
+    const a=nums(v.list); if(a.length<2) return {auto:null,why:"Nhập điện áp ít nhất 2 bình, hoặc chọn kết luận thủ công nếu nộp kèm report.",text:a.length?("U: "+fmt(a[0])+" V"):""};
+    const avg=a.reduce((s,x)=>s+x,0)/a.length; const dev=Math.max(...a.map(x=>Math.abs(x-avg)/avg*100)); const ok=dev<=it.tol+1e-9;
+    return {auto:ok?"dat":"kdat",why:"Sai lệch lớn nhất so với trung bình: "+fmt(dev,1)+"% ("+(ok?"≤":">")+" "+it.tol+"%).",text:a.length+" bình; TB "+fmt(avg)+" V; min "+fmt(Math.min(...a))+" V; max "+fmt(Math.max(...a))+" V; lệch lớn nhất "+fmt(dev,1)+"%"};
+  }
+  if(it.type==="torque"){
+    const b=v.bolt, a=nums(v.list);
+    if(!b||!TORQUE[b]) return {auto:null,why:"Chọn loại ốc.",text:a.length?("Lực siết: "+a.map(x=>fmt(x)).join("; ")+" N.m"):""};
+    const [lo,hi]=TORQUE[b]; const text="Loại ốc: "+b+"\nLực siết: "+(a.length?a.map(x=>fmt(x)).join("; "):"—")+" N.m";
+    if(!a.length) return {auto:null,why:"Nhập lực siết đo được.",text};
+    const bad=a.filter(x=>x<lo||x>hi).length;
+    return {auto:bad?"kdat":"dat",why:bad?(bad+" giá trị ngoài dải "+lo+"-"+hi+" N.m."):("Tất cả trong dải "+lo+"-"+hi+" N.m."),text};
+  }
+  if(it.type==="ovl"){
+    const all=[]; it.groups.forEach(g=>g[1].forEach(k=>all.push(k)));
+    let empty=0,zero=0,numeric=0; const parts=[];
+    all.forEach(k=>{ const r=(v["r_"+k]||"").trim(); if(!r){empty++;parts.push(k+": —");return;}
+      const u=r.toUpperCase(); if(u==="OVL"||u==="N/A"){parts.push(k+": "+u);return;}
+      const n=num(r); if(n===null){parts.push(k+": "+r);numeric++;return;} if(n===0) zero++; else numeric++; parts.push(k+": "+fmt(n)+" Ω"); });
+    const text=parts.join("\n");
+    if(zero) return {auto:"kdat",why:zero+" tổ hợp có giá trị 0.",text};
+    if(empty) return {auto:null,why:"Còn "+empty+" tổ hợp chưa nhập.",text};
+    if(numeric) return {auto:"review",why:numeric+" tổ hợp có giá trị số. Kiểm tra tính tương đồng rồi chọn kết luận.",text};
+    return {auto:"dat",why:"Tất cả tổ hợp OVL (hoặc N/A).",text};
+  }
+  return {auto:null,why:"",text:""};
+}
+function isOut(it,n,sp){ if(it.type==="hvac") return sp!==null && Math.abs(n-sp)>it.tol+1e-9; return n<it.min||n>it.max; }
+function finalResult(it){
+  const st=S.items[it.id]; if(it.type==="manual") return st.result||"cho";
+  const e=evaluate(it);
+  if(st.override || e.auto==="review") return st.result||"cho";
+  if(e.auto==="dat"||e.auto==="kdat") return e.auto;
+  return "cho";
+}
+
+/* ===================== RENDER ===================== */
+const main=$("main");
+function go(i){ S.cur=Math.max(0,Math.min(TOTAL-1,i)); save(); render(); main.scrollTop=0; }
+function render(){
+  const i=S.cur;
+  $("stepCount").innerHTML= i===0? "Thông tin chung" : i===TOTAL-1? "Tổng kết" : "Bước "+i+" <small>/ "+ITEMS.length+"</small>";
+  $("barFill").style.width=(i/(TOTAL-1)*100)+"%";
+  $("btnPrev").disabled = i===0;
+  $("btnNext").textContent = i===TOTAL-2? "Tổng kết" : i===TOTAL-1? "Xuất PDF" : "Tiếp";
+  if(i===0) renderInfo(); else if(i===TOTAL-1) renderSummary(); else renderItem(ITEMS[i-1]);
+}
+
+function renderInfo(){
+  main.innerHTML = `<div class="head"><div class="eyebrow">Checklist trước khi cấp điện UPS</div><h1>Thông tin chung</h1></div>
+  <div class="block" id="infoForm">${INFO_FIELDS.map(([k,l,r])=>`<label class="f" for="in_${k}">${esc(l)}${r?" <em>*</em>":""}<input class="inp" id="in_${k}" data-k="${k}" ${k==="power"?'inputmode="decimal"':""} value="${esc(S.info[k]||"")}" autocomplete="off"></label>`).join("")}</div>
+  <p class="hint">Mục có dấu * là bắt buộc. Dữ liệu tự lưu nháp trên máy này, tắt trình duyệt không bị mất.</p>
+  <button class="btn danger" type="button" id="btnReset">Tạo phiên kiểm tra mới</button>`;
+  main.querySelectorAll("#infoForm input").forEach(inp=>inp.addEventListener("input",()=>{S.info[inp.dataset.k]=inp.value;inp.classList.remove("err");save();}));
+  $("btnReset").onclick=()=>confirmBox("Xóa toàn bộ dữ liệu và ảnh của phiên hiện tại để bắt đầu phiên mới?","Xóa và tạo mới",()=>{S=blank();save();render();toast("Đã tạo phiên mới");});
+}
+
+function critHTML(it){
+  return `<div class="crit">
+   <div class="crit-box"><span class="tag ok">ĐẠT NẾU</span><ul>${it.pass.map(x=>"<li>"+esc(x)+"</li>").join("")}</ul></div>
+   <div class="crit-box"><span class="tag bad">KHÔNG ĐẠT NẾU</span><ul>${it.fail.map(x=>"<li>"+esc(x)+"</li>").join("")}</ul></div></div>
+   ${it.req?`<div class="req"><b>Yêu cầu</b><span>${esc(it.req)}</span></div>`:""}`;
+}
+
+function measureHTML(it){
+  const v=S.items[it.id].vals;
+  if(it.type==="manual"){
+    let h="";
+    if(it.checks) h+=`<div class="block"><h2>Giao thức đã lắp</h2><div class="checks">${it.checks.map(c=>`<label><input type="checkbox" data-chk="${esc(c)}" ${v["chk_"+c]?"checked":""}>${esc(c)}</label>`).join("")}</div></div>`;
+    h+=`<label class="f" for="m_record">Kết quả ghi nhận (nếu có)<textarea class="inp" id="m_record" data-v="record" rows="2">${esc(v.record||"")}</textarea></label>`;
+    return h;
+  }
+  if(it.type==="single") return `<label class="f" for="m_x">${esc(it.label)} (${esc(it.unit)})<input class="inp" id="m_x" data-v="x" inputmode="decimal" value="${esc(v.x||"")}" placeholder="Nhập giá trị"></label>`;
+  if(it.type==="range"||it.type==="hvac"){
+    let h=`<div class="block"><h2>Số đo nhiệt độ (°C)</h2>`;
+    if(it.type==="hvac") h+=`<label class="f" for="m_sp">Nhiệt độ cài đặt HVAC (°C)<input class="inp" id="m_sp" data-v="sp" inputmode="decimal" value="${esc(v.sp||"")}" placeholder="VD: 22"></label>`;
+    it.pos.forEach((p,pi)=>{ h+=`<div class="pos"><div class="pos-t">${esc(p[0])}</div><div class="pos-d">${esc(p[1])}</div><div class="grid3">`+
+      [0,1,2].map(k=>`<div class="cell"><span class="mini">Lần ${k+1}</span><input class="inp" id="m_p${pi}_${k}" data-v="p${pi}_${k}" inputmode="decimal" value="${esc(v["p"+pi+"_"+k]||"")}" aria-label="${esc(p[0])} lần ${k+1}"></div>`).join("")+`</div></div>`; });
+    if(it.note) h+=`<p class="hint">${esc(it.note)}</p>`;
+    return h+`</div>`;
+  }
+  if(it.type==="deltaT"||it.type==="voltages"){
+    const u=it.type==="deltaT"?"°C":"V";
+    return `<div class="block"><label class="f" for="m_list">${it.type==="deltaT"?"Nhiệt độ từng bình":"Điện áp hở mạch từng bình"} (${u})<textarea class="inp" id="m_list" data-v="list" inputmode="decimal" rows="4" placeholder="Các giá trị cách nhau bởi dấu cách hoặc xuống dòng. VD: 13,2 13,1 13,3">${esc(v.list||"")}</textarea></label>
+      <div class="vals" id="valsView"></div>${it.note?`<p class="hint">${esc(it.note)}. Có thể bỏ trống và chọn kết luận thủ công.</p>`:""}
+      ${it.type==="voltages"?'<p class="hint">Sai số tính theo độ lệch của từng bình so với giá trị trung bình.</p>':""}</div>`;
+  }
+  if(it.type==="torque"){
+    return `<div class="block"><label class="f" for="m_bolt">Loại ốc<select class="inp" id="m_bolt" data-v="bolt"><option value="">Chọn loại ốc</option>${Object.keys(TORQUE).map(k=>`<option value="${k}" ${v.bolt===k?"selected":""}>${k} (${TORQUE[k][0]}-${TORQUE[k][1]} N.m)</option>`).join("")}</select></label>
+      <label class="f" for="m_list">Lực siết đo được (N.m)<textarea class="inp" id="m_list" data-v="list" inputmode="decimal" rows="3" placeholder="Một hoặc nhiều giá trị, cách nhau bởi dấu cách">${esc(v.list||"")}</textarea></label><div class="vals" id="valsView"></div></div>`;
+  }
+  if(it.type==="ovl"){
+    let h=`<div class="block"><h2>Điện trở các tổ hợp (Ω)</h2><p class="hint">Nhập số đo, hoặc bấm OVL / N/A. N/A dùng cho tổ hợp không có (VD: không có dây N).</p>
+      <button class="btn ghost" type="button" id="allOvl">Điền OVL cho các ô còn trống</button>`;
+    it.groups.forEach(g=>{ h+=`<div class="ovl-group"><h3>${esc(g[0])}</h3>`+g[1].map(k=>{const r=v["r_"+k]||"";const u=r.trim().toUpperCase();
+      return `<div class="ovl-row"><span class="lab">${esc(k)}</span><input class="inp" id="m_r_${esc(k)}" data-v="r_${esc(k)}" inputmode="decimal" value="${esc(r)}" aria-label="R ${esc(k)}"><button type="button" class="chip ${u==="OVL"?"on":""}" data-set="OVL" data-for="r_${esc(k)}">OVL</button><button type="button" class="chip ${u==="N/A"?"on":""}" data-set="N/A" data-for="r_${esc(k)}">N/A</button></div>`;}).join("")+`</div>`;});
+    return h+`</div>`;
+  }
+  return "";
+}
+
+function renderItem(it){
+  const st=S.items[it.id];
+  main.innerHTML = `<div class="head"><div class="eyebrow">${esc(SECTIONS[it.sec])}</div><div class="code">${it.code}</div><h1>${esc(it.title)}</h1></div>
+   ${critHTML(it)}
+   <div class="block">${measureHTML(it)}</div>
+   <div class="verdict" id="verdict"></div>
+   <label class="f" for="m_note">Ghi chú<textarea class="inp" id="m_note" rows="2" placeholder="Ghi chú thêm (nếu có)">${esc(st.note||"")}</textarea></label>
+   <div class="block"><h2>Hình ảnh</h2>
+     <div class="ph-actions"><label class="btn primary" for="fileCam">Chụp ảnh</label><label class="btn" for="fileLib">Chọn từ thư viện</label></div>
+     <input class="vh" type="file" id="fileCam" accept="image/*" capture="environment">
+     <input class="vh" type="file" id="fileLib" accept="image/*" multiple>
+     <div class="thumbs" id="thumbs"></div></div>`;
+  // inputs đo
+  main.querySelectorAll("[data-v]").forEach(el=>{
+    const h=()=>{ st.vals[el.dataset.v]=el.value; save(); updateVerdict(it); syncChips(); };
+    el.addEventListener("input",h); el.addEventListener("change",h);
+  });
+  main.querySelectorAll("[data-chk]").forEach(el=>el.addEventListener("change",()=>{st.vals["chk_"+el.dataset.chk]=el.checked;save();}));
+  main.querySelectorAll("[data-set]").forEach(b=>b.addEventListener("click",()=>{
+    const k=b.dataset.for, inp=main.querySelector(`[data-v="${CSS.escape(k)}"]`); const cur=(st.vals[k]||"").trim().toUpperCase();
+    const nv= cur===b.dataset.set? "" : b.dataset.set; st.vals[k]=nv; inp.value=nv; save(); updateVerdict(it); syncChips();
+  }));
+  const ao=$("allOvl"); if(ao) ao.onclick=()=>{ it.groups.forEach(g=>g[1].forEach(k=>{ if(!(st.vals["r_"+k]||"").trim()){ st.vals["r_"+k]="OVL"; const i=main.querySelector(`[data-v="${CSS.escape("r_"+k)}"]`); if(i) i.value="OVL"; } })); save(); updateVerdict(it); syncChips(); };
+  $("m_note").addEventListener("input",e=>{st.note=e.target.value;save();});
+  ["fileCam","fileLib"].forEach(fid=>{ const fi=$(fid); fi.addEventListener("change",e=>onFiles(e,it)); });
+  updateVerdict(it); renderThumbs(it); syncChips();
+  function syncChips(){
+    main.querySelectorAll("[data-set]").forEach(b=>{ const cur=(st.vals[b.dataset.for]||"").trim().toUpperCase(); b.classList.toggle("on",cur===b.dataset.set); });
+    // tô màu ô nhiệt độ
+    if(it.type==="range"||it.type==="hvac"){ const sp=num(st.vals.sp); main.querySelectorAll('[data-v^="p"]').forEach(el=>{ const n=num(el.value); el.classList.remove("in","out"); if(n!==null && (it.type!=="hvac"||sp!==null)) el.classList.add(isOut(it,n,sp)?"out":"in"); }); }
+    if(it.type==="single"){ const el=$("m_x"); const n=num(el.value); el.classList.remove("in","out"); if(n!==null){ const ok=(it.min==null||n>=it.min)&&(it.max==null||n<=it.max); el.classList.add(ok?"in":"out"); } }
+    const vv=$("valsView"); if(vv){ const a=nums(st.vals.list); let flag=()=>false;
+      if(it.type==="deltaT"&&a.length){ const mn=Math.min(...a); flag=x=>x-mn>it.tol; }
+      if(it.type==="voltages"&&a.length){ const avg=a.reduce((s,x)=>s+x,0)/a.length; flag=x=>Math.abs(x-avg)/avg*100>it.tol; }
+      if(it.type==="torque"&&TORQUE[st.vals.bolt]){ const [lo,hi]=TORQUE[st.vals.bolt]; flag=x=>x<lo||x>hi; }
+      vv.innerHTML=a.map((x,i)=>`<span class="v ${flag(x)?"out":""}">${it.type==="torque"?"":"#"+(i+1)+": "}${fmt(x)}</span>`).join(""); }
+  }
+}
+
+function updateVerdict(it){
+  const st=S.items[it.id], box=$("verdict"); if(!box) return;
+  const e=evaluate(it);
+  const segHTML=`<div class="seg">${["dat","kdat","na"].map(k=>`<button type="button" data-v="${k}" class="${st.result===k?"on":""}">${LABEL[k]}</button>`).join("")}</div>`;
+  let h=`<h2>Kết luận</h2>`;
+  if(it.type==="manual"){ h+=segHTML; }
+  else {
+    const autoLabel = e.auto==="dat"||e.auto==="kdat" ? `<span class="pill ${e.auto}">${LABEL[e.auto]}</span>` : e.auto==="review"? `<span class="pill cho">Cần đánh giá</span>` : `<span class="pill cho">Chưa đủ số đo</span>`;
+    h+=`<div class="auto"><span>Tự động:</span>${autoLabel}<span class="auto-why">${esc(e.why)}</span></div>`;
+    if(e.auto==="review"){ h+=segHTML; }
+    else if(st.override){ h+=`<p class="hint">Đang dùng kết luận thủ công.</p>`+segHTML+`<button type="button" class="linkbtn" id="ovOff">Dùng lại kết luận tự động</button>`; }
+    else h+=`<button type="button" class="linkbtn" id="ovOn">Chọn kết luận thủ công</button>`;
+  }
+  box.innerHTML=h;
+  box.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{ st.result= st.result===b.dataset.v? null : b.dataset.v; save(); updateVerdict(it); });
+  const on=$("ovOn"); if(on) on.onclick=()=>{st.override=true;save();updateVerdict(it);};
+  const off=$("ovOff"); if(off) off.onclick=()=>{st.override=false;st.result=null;save();updateVerdict(it);};
+}
+
+/* ===================== ẢNH ===================== */
+function phName(it,st){ st.seq=(st.seq||0)+1; return it.code+"_"+String(st.seq).padStart(2,"0"); }
+function normPhotos(it,st){ st.photos=(st.photos||[]).map(p=>{ if(typeof p==="string"){ return {name:phName(it,st),data:p}; } return p; }); }
+function renderThumbs(it){
+  const st=S.items[it.id], el=$("thumbs"); if(!el) return; normPhotos(it,st);
+  el.innerHTML = st.photos.length? st.photos.map((p,i)=>`<div class="ph-item"><div class="thumb"><img src="${p.data}" alt="${esc(p.name)}" data-i="${i}"><button type="button" data-del="${i}" aria-label="Xóa ảnh ${esc(p.name)}">×</button></div><span class="ph-name">${esc(p.name)}</span></div>`).join("") : `<span class="empty-ph">Chưa có ảnh.</span>`;
+  el.style.display = st.photos.length? "grid":"block";
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>confirmBox("Xóa ảnh "+st.photos[+b.dataset.del].name+"?","Xóa ảnh",()=>{st.photos.splice(+b.dataset.del,1);save();renderThumbs(it);}));
+  el.querySelectorAll("img").forEach(img=>img.onclick=()=>{ const v=document.createElement("div"); v.className="viewer"; v.innerHTML=`<img src="${img.src}" alt=""><button class="icon-btn" type="button">Đóng</button>`; v.onclick=()=>v.remove(); document.body.appendChild(v); });
+}
+function compress(file,stamp){
+  return new Promise((res,rej)=>{ const url=URL.createObjectURL(file); const img=new Image();
+    img.onload=()=>{ const max=1280; const s=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight)); const c=document.createElement("canvas");
+      c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s); const g=c.getContext("2d"); g.drawImage(img,0,0,c.width,c.height);
+      const fs=Math.max(14,Math.round(c.width/48)); g.font="600 "+fs+"px sans-serif"; const tw=g.measureText(stamp).width;
+      g.fillStyle="rgba(0,0,0,.55)"; g.fillRect(c.width-tw-fs*1.2,c.height-fs*1.9,tw+fs*1.2,fs*1.9); g.fillStyle="#fff"; g.fillText(stamp,c.width-tw-fs*0.6,c.height-fs*0.6);
+      URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg",0.72)); };
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error("Không đọc được ảnh"));}; img.src=url; });
+}
+async function onFiles(e,it){
+  const input=e.target; const files=[...(input.files||[])]; if(!files.length) return;
+  const st=S.items[it.id]; normPhotos(it,st); let added=0;
+  for(const f of files){ try{ const d=new Date(); const name=phName(it,st); st.photos.push({name,data:await compress(f, name+" · "+dmy(d)+" "+hm(d))}); added++; }catch(err){ toast("Không đọc được 1 ảnh"); } }
+  input.value=""; save(); if(ITEMS[S.cur-1]&&ITEMS[S.cur-1].id===it.id) renderThumbs(it); if(added) toast("Đã thêm "+added+" ảnh");
+}
+
+/* ===================== TỔNG KẾT ===================== */
+function counts(){ const c={dat:0,kdat:0,na:0,cho:0}; ITEMS.forEach(it=>c[finalResult(it)]++); return c; }
+function renderSummary(){
+  const c=counts(); const fails=ITEMS.filter(it=>finalResult(it)==="kdat"), todo=ITEMS.filter(it=>finalResult(it)==="cho");
+  const missing=INFO_FIELDS.filter(f=>f[2]&&!(S.info[f[0]]||"").trim());
+  const photos=ITEMS.reduce((s,it)=>s+S.items[it.id].photos.length,0);
+  const row=it=>{const r=finalResult(it);return `<button type="button" data-go="${ITEMS.indexOf(it)+1}"><span class="c">${it.code}</span><span>${esc(it.title)}</span><span class="dot ${r}"></span></button>`;};
+  main.innerHTML=`<div class="head"><div class="eyebrow">${esc(S.info.project||"Chưa nhập tên dự án")} · ${esc(S.info.ups||"Chưa nhập tên UPS")}</div><h1>Tổng kết kiểm tra</h1></div>
+   <div class="stats"><div class="stat dat"><b>${c.dat}</b><span>Đạt</span></div><div class="stat kdat"><b>${c.kdat}</b><span>Không đạt</span></div><div class="stat na"><b>${c.na}</b><span>N/A</span></div><div class="stat cho"><b>${c.cho}</b><span>Chưa kiểm</span></div></div>
+   <p class="hint">Tổng ${ITEMS.length} hạng mục, ${photos} ảnh.</p>
+   ${missing.length?`<div class="note-warn">Thiếu thông tin chung: ${missing.map(f=>esc(f[1])).join(", ")}. <button class="linkbtn" type="button" data-go="0">Bổ sung</button></div>`:""}
+   ${fails.length?`<div class="block"><h2>Không đạt (${fails.length})</h2><div class="list">${fails.map(row).join("")}</div></div>`:""}
+   ${todo.length?`<div class="block"><h2>Chưa kiểm (${todo.length})</h2><div class="list">${todo.map(row).join("")}</div></div>`:""}
+   <button class="btn primary" type="button" id="btnPdf">Xuất báo cáo PDF</button>
+   <p class="hint">Báo cáo gồm thông tin chung, bảng kết quả từng hạng mục và phụ lục hình ảnh.</p>`;
+  main.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>go(+b.dataset.go));
+  $("btnPdf").onclick=exportPdf;
+}
+
+/* ===================== DANH SÁCH (drawer) ===================== */
+function openMenu(){
+  const d=document.createElement("div"); d.className="drawer";
+  let h=`<div class="scrim"></div><div class="panel"><div class="ph"><b>Danh sách hạng mục</b><button class="icon-btn" type="button" id="dClose">Đóng</button></div><div class="pb">
+   <div class="list"><button type="button" data-go="0" class="${S.cur===0?"cur":""}"><span class="c">TT</span><span>Thông tin chung</span><span></span></button></div>`;
+  Object.keys(SECTIONS).forEach(sk=>{ h+=`<div class="block"><h2>${esc(SECTIONS[sk])}</h2><div class="list">`+ITEMS.filter(i=>i.sec===sk).map(it=>{const idx=ITEMS.indexOf(it)+1;const r=finalResult(it);return `<button type="button" data-go="${idx}" class="${S.cur===idx?"cur":""}"><span class="c">${it.code}</span><span>${esc(it.title)}</span><span class="dot ${r}" title="${LABEL[r]}"></span></button>`;}).join("")+`</div></div>`; });
+  h+=`<div class="list"><button type="button" data-go="${TOTAL-1}"><span class="c">TK</span><span>Tổng kết và xuất PDF</span><span></span></button></div></div></div>`;
+  d.innerHTML=h; document.body.appendChild(d);
+  const close=()=>d.remove(); d.querySelector(".scrim").onclick=close; d.querySelector("#dClose").onclick=close;
+  d.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{close();go(+b.dataset.go);});
+  const cur=d.querySelector(".cur"); if(cur) cur.scrollIntoView({block:"center"});
+}
+function confirmBox(msg,okText,onOk){
+  const m=document.createElement("div"); m.className="modal";
+  m.innerHTML=`<div class="scrim"></div><div class="box" role="dialog" aria-modal="true"><b>Xác nhận</b><p>${esc(msg)}</p><div class="row"><button class="btn ghost" type="button" data-x>Hủy</button><button class="btn danger" type="button" data-ok>${esc(okText)}</button></div></div>`;
+  document.body.appendChild(m); m.querySelector(".scrim").onclick=()=>m.remove(); m.querySelector("[data-x]").onclick=()=>m.remove();
+  m.querySelector("[data-ok]").onclick=()=>{m.remove();onOk();};
+}
+
+/* ===================== XUẤT PDF ===================== */
+const PDF_C={dat:"#1d7a3e",kdat:"#b42318",na:"#000000",cho:"#9a6200"};
+function buildDoc(){
+  const now=new Date(), c=counts();
+  const info=INFO_FIELDS.map(f=>[f[1],S.info[f[0]]||""]); info.push(["Ngày xuất báo cáo",dmy(now)+" "+hm(now)]);
+  const infoRows=[]; for(let i=0;i<info.length;i+=2){ const a=info[i], b=info[i+1]||["",""]; infoRows.push([{text:a[0],style:"lab"},{text:a[1],bold:true},{text:b[0],style:"lab"},{text:b[1],bold:true}]); }
+  const content=[
+    {text:DOC_TITLE,style:"title"},
+    {table:{widths:[95,"*",95,"*"],body:vCenter(infoRows,[95,"*",95,"*"],5)},layout:lightLayout(),margin:[0,6,0,10]},
+    {table:{widths:["*","*","*","*","*"],body:[[
+      {text:"Tổng: "+ITEMS.length,bold:true},{text:"Đạt: "+c.dat,color:PDF_C.dat,bold:true},{text:"Không đạt: "+c.kdat,color:PDF_C.kdat,bold:true},{text:"N/A: "+c.na,color:PDF_C.na,bold:true},{text:"Chưa kiểm: "+c.cho,color:PDF_C.cho,bold:true}]]},layout:lightLayout(),margin:[0,0,0,12]}
+  ];
+  const head=["STT","Hạng mục","Giá trị yêu cầu","Kết quả đo hoặc ghi nhận","Kết luận","Ghi chú"].map(t=>({text:t,style:"th"}));
+  const body=[head];
+  Object.keys(SECTIONS).forEach(sk=>{
+    body.push([{text:SECTIONS[sk],colSpan:6,style:"sec"},{},{},{},{},{}]);
+    ITEMS.filter(i=>i.sec===sk).forEach(it=>{
+      const st=S.items[it.id], e=evaluate(it), r=finalResult(it);
+      let concl=LABEL[r]; if(it.type!=="manual" && (st.override||e.auto==="review") && st.result) concl+="\n(thủ công)";
+      const notes=[it.note,st.note].filter(Boolean).join("\n"); const np=st.photos.length;
+      body.push([{text:it.code,alignment:"center"},{text:it.title,bold:true},{text:it.req||"",fontSize:8},{text:e.text||"",fontSize:8},{text:concl,bold:true,color:PDF_C[r],alignment:"center"},{text:notes+(np?(notes?"\n":"")+"Ảnh: "+np:""),fontSize:8}]);
+    });
+  });
+  content.push({table:{headerRows:1,dontBreakRows:true,widths:[26,"*",72,118,52,78],body:vCenter(body,[26,"*",72,118,52,78],4)},layout:gridLayout()});
+  content.push({columns:[{width:"*",text:""},{width:200,stack:[{text:"KỸ THUẬT KIỂM TRA",bold:true,alignment:"center"},{text:"(Ký, ghi rõ họ tên)",italics:true,fontSize:8,alignment:"center",margin:[0,0,0,46]},{text:S.info.tech||"",bold:true,alignment:"center"}]}],margin:[0,22,0,0],unbreakable:true});
+  // phụ lục ảnh
+  const withPh=ITEMS.filter(it=>S.items[it.id].photos.length);
+  if(withPh.length){
+    content.push({text:"PHỤ LỤC HÌNH ẢNH",style:"title",pageBreak:"before"});
+    withPh.forEach(it=>{
+      const ph=S.items[it.id].photos; const rows=[];
+      for(let i=0;i<ph.length;i+=3){ rows.push({columns:[0,1,2].map(k=>ph[i+k]?{width:"*",stack:[{image:ph[i+k].data,fit:[160,120],alignment:"center"},{text:ph[i+k].name,fontSize:7.5,alignment:"center",color:"#000000",margin:[0,2,0,0]}]}:{width:"*",text:""}),columnGap:10,margin:[0,0,0,8],unbreakable:true}); }
+      content.push({stack:[{text:it.code+"  "+it.title+"  —  "+LABEL[finalResult(it)],bold:true,margin:[0,8,0,6]},rows[0]],unbreakable:true});
+      rows.slice(1).forEach(r=>content.push(r));
+    });
+  }
+  return {pageSize:"A4",pageMargins:[30,36,30,40],content,
+    footer:(p,n)=>({columns:[{text:""},{text:"Trang "+p+"/"+n,alignment:"right",fontSize:7.5,color:"#000000"}],margin:[30,12,30,0]}),
+    defaultStyle:{font:"Roboto",fontSize:9,lineHeight:1.15},
+    styles:{title:{fontSize:13,bold:true,alignment:"center",margin:[0,0,0,6]},lab:{color:"#000000",fontSize:8.5},th:{bold:true,fillColor:"#1B5E20",color:"#ffffff",alignment:"center",fontSize:8.5},sec:{bold:true,fillColor:"#1B5E20",color:"#ffffff"}},
+    info:{title:DOC_TITLE,author:S.info.tech||""}};
+}
+/* Căn giữa theo chiều dọc: đo chiều cao chữ từng ô bằng chính font Roboto của PDF, rồi thêm lề trên */
+const PDF_W=595.28-60, PDF_STYLES={lab:{fontSize:8.5},th:{fontSize:8.5,bold:true},sec:{bold:true}};
+let measureReady=false, mctx=null;
+async function loadMeasureFonts(){
+  if(measureReady) return true;
+  try{
+    const b2u=b=>{const s=atob(b);const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer;};
+    const defs=[["PdfRobotoR","Roboto-Regular.ttf"],["PdfRobotoM","Roboto-Medium.ttf"]];
+    for(const [fam,file] of defs){ const ff=new FontFace(fam,b2u(pdfMake.vfs[file])); await ff.load(); document.fonts.add(ff); }
+    mctx=document.createElement("canvas").getContext("2d"); measureReady=true;
+  }catch(e){ measureReady=false; }
+  return measureReady;
+}
+function textHeight(cell,width){
+  const st=PDF_STYLES[cell.style]||{}; const size=cell.fontSize||st.fontSize||9; const bold=cell.bold||st.bold;
+  mctx.font=size+"px "+(bold?"PdfRobotoM":"PdfRobotoR");
+  const sp=mctx.measureText(" ").width; let lines=0;
+  String(cell.text==null?"":cell.text).split("\n").forEach(par=>{
+    const words=par.split(/ +/); let w=0, n=1;
+    words.forEach((wd,i)=>{ const ww=mctx.measureText(wd).width; if(i>0 && w+sp+ww>width+0.01){ n++; w=ww; } else w+= (i>0?sp:0)+ww; });
+    lines+=n;
+  });
+  return lines*size*1.171875*1.15;
+}
+function vCenter(body,widths,padX){
+  if(!measureReady) return body;
+  const n=widths.length, offsets=n*padX*2+(n+1)*0.5;
+  const fixed=widths.filter(w=>w!=="*").reduce((a,b)=>a+b,0), stars=widths.filter(w=>w==="*").length;
+  const starW=(PDF_W-fixed-offsets)/(stars||1); const abs=widths.map(w=>w==="*"?starW:w);
+  body.forEach(row=>{
+    if(row.some(c=>c&&c.colSpan>1)) return;
+    const hs=row.map((c,i)=>textHeight(c,abs[i])); const H=Math.max(...hs);
+    row.forEach((c,i)=>{ const m=(H-hs[i])/2; if(m>0.5) c.margin=[0,m,0,0]; });
+  });
+  return body;
+}
+function lightLayout(){return {hLineWidth:()=>0.5,vLineWidth:()=>0.5,hLineColor:()=>"#000000",vLineColor:()=>"#000000",paddingTop:()=>4,paddingBottom:()=>4,paddingLeft:()=>5,paddingRight:()=>5};}
+function gridLayout(){return {hLineWidth:()=>0.5,vLineWidth:()=>0.5,hLineColor:()=>"#000000",vLineColor:()=>"#000000",paddingTop:()=>4,paddingBottom:()=>4,paddingLeft:()=>4,paddingRight:()=>4};}
+function fileName(){ const d=new Date(); const s=(x)=>String(x||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_|_$/g,""); return "Checklist_UPS_"+(s(S.info.ups)||"UPS")+"_"+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+".pdf"; }
+let exporting=false;
+async function exportPdf(){
+  if(exporting) return;
+  if(typeof pdfMake==="undefined"||!pdfMake.vfs){ toast("Chưa tải được thư viện PDF. Kiểm tra kết nối mạng rồi tải lại trang."); return; }
+  exporting=true; const b=$("btnPdf"); if(b){b.disabled=true;b.textContent="Đang tạo PDF…";}
+  try{
+    await loadMeasureFonts();
+    const blob=await new Promise((res,rej)=>{ try{ pdfMake.createPdf(buildDoc()).getBlob(res); }catch(e){rej(e);} });
+    await savePdf(blob,fileName());
+  }catch(e){ toast("Lỗi tạo PDF: "+(e&&e.message||e)); }
+  finally{ exporting=false; if(b){b.disabled=false;b.textContent="Xuất báo cáo PDF";} }
+}
+async function savePdf(blob,name){
+  if(window.claude && typeof window.claude.use==="function"){
+    const dl=await window.claude.use("downloads");
+    if(dl){ try{ await dl.save({filename:name,data:blob}); toast("Đã lưu "+name); }catch(e){ toast(e&&e.code==="declined"?"Đã hủy lưu file":"Không lưu được: "+(e&&(e.message||e.code))); } return; }
+  }
+  const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000); toast("Đã tạo "+name);
+}
+
+/* ===================== ĐIỀU HƯỚNG ===================== */
+$("btnPrev").onclick=()=>go(S.cur-1);
+$("btnNext").onclick=()=>{
+  if(S.cur===0){ const miss=INFO_FIELDS.filter(f=>f[2]&&!(S.info[f[0]]||"").trim()); if(miss.length){ miss.forEach(f=>{const i=$("in_"+f[0]); if(i) i.classList.add("err");}); toast("Nhập: "+miss.map(f=>f[1]).join(", ")); const i=$("in_"+miss[0][0]); if(i) i.focus(); return; } }
+  if(S.cur===TOTAL-1){ exportPdf(); return; }
+  go(S.cur+1);
+};
+$("btnMenu").onclick=openMenu;
+
+/* ===================== KHỞI ĐỘNG ===================== */
+render();
+(async()=>{ try{ const saved=await KV.get("state"); if(saved&&saved.items){ const b=blank(); Object.keys(b.items).forEach(k=>{ if(saved.items[k]) b.items[k]=Object.assign(b.items[k],saved.items[k]); }); b.info=saved.info||{}; b.cur=Math.min(saved.cur||0,TOTAL-1); b.created=saved.created||b.created; S=b; ITEMS.forEach(it=>normPhotos(it,S.items[it.id])); render(); $("saved").textContent="Đã mở lại nháp"; } }catch(e){} })();
+window.__ups={S:()=>S,buildDoc,loadMeasureFonts,evaluate,ITEMS};
+})();
+</script>
+</body></html>
