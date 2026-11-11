@@ -26,14 +26,17 @@ button,label.btn,summary{cursor:pointer;touch-action:manipulation}
 .top-row{display:flex;align-items:center;gap:10px;min-height:44px}
 .step-count{white-space:nowrap;font-family:var(--f-display);font-size:24px;font-weight:700;letter-spacing:.02em;font-variant-numeric:tabular-nums;line-height:1.1}
 .step-count small{font-size:18px;opacity:.85}
-.saved{margin-left:auto;font-size:13px;opacity:.9;text-align:right;white-space:nowrap}
+.top-row2{display:flex;align-items:center;gap:10px;min-width:0}
+.top-row2 .top-sec{flex:1;min-width:0}
+.reset-btn{margin-left:auto;border-color:#ffd8a8;color:#fff4e6}
+.saved{flex-shrink:0;font-size:13px;opacity:.9;text-align:right;white-space:nowrap}
 .icon-btn{border:2px solid rgba(255,255,255,.85);background:transparent;color:#fff;border-radius:10px;min-height:44px;padding:0 14px;font-size:15px;font-weight:700;white-space:nowrap;transition:background .15s}
 .icon-btn:active{background:rgba(255,255,255,.18)}
 .top-sec{font-size:13.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;opacity:.95;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bar{height:6px;background:rgba(255,255,255,.28);border-radius:3px;overflow:hidden}
 .bar>i{display:block;height:100%;background:#fff;width:0;transition:width .25s}
 /* main */
-main{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 28px;display:flex;flex-direction:column;gap:16px;overscroll-behavior:contain}
+main{min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 28px;display:flex;flex-direction:column;gap:16px;overscroll-behavior:contain}
 main>*{flex-shrink:0}
 .eyebrow{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--brand)}
 .head{display:grid;gap:6px}
@@ -43,13 +46,10 @@ h2{margin:0;font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:u
 .block{display:grid;gap:10px}
 /* tiêu chí */
 .crit{display:grid;gap:8px}
-details.crit-box{border:1.5px solid var(--line);background:var(--surface);border-radius:var(--r);overflow:hidden}
-details.crit-box summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;padding:8px 14px;font-weight:700;font-size:15px}
-details.crit-box summary::-webkit-details-marker{display:none}
-details.crit-box summary::after{content:"Mở";font-size:13px;font-weight:600;color:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:2px 8px}
-details.crit-box[open] summary::after{content:"Thu gọn"}
-details.crit-box.ok summary{color:var(--ok);background:var(--ok-soft)}
-details.crit-box.bad summary{color:var(--bad);background:var(--bad-soft)}
+.crit-box{border:1.5px solid var(--line);background:var(--surface);border-radius:var(--r);overflow:hidden}
+.crit-h{display:flex;align-items:center;min-height:44px;padding:8px 14px;font-weight:700;font-size:15px;letter-spacing:.02em}
+.crit-box.ok .crit-h{color:var(--ok);background:var(--ok-soft)}
+.crit-box.bad .crit-h{color:var(--bad);background:var(--bad-soft)}
 .crit-box ul{margin:0;padding:10px 14px 12px 32px;display:grid;gap:4px;font-size:16px}
 .tag{display:none}
 .req{display:grid;gap:4px;background:var(--brand-soft);border:1.5px solid #b9d4ba;border-radius:var(--r);padding:10px 14px;font-size:16px}
@@ -145,7 +145,8 @@ label.btn{user-select:none;-webkit-user-select:none}
 .modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:16px}
 .modal .scrim{position:absolute;inset:0;background:rgba(0,0,0,.55)}
 .modal .box{position:relative;background:var(--surface);border-radius:14px;padding:20px;display:grid;gap:14px;max-width:400px;width:100%;font-size:17px}
-.modal .box p{margin:0;font-size:16px;color:var(--ink-2)}
+.modal .box p{margin:0;font-size:16px;color:var(--ink-2);white-space:pre-line}
+.modal .box p.warn{color:var(--bad);font-weight:700}
 .modal .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .viewer{position:fixed;inset:0;z-index:40;background:#000;display:grid;place-items:center}
 .viewer img{max-width:100%;max-height:100%}
@@ -159,10 +160,10 @@ label.btn{user-select:none;-webkit-user-select:none}
   <header class="top">
     <div class="top-row">
       <span class="step-count" id="stepCount"></span>
-      <span class="saved" id="saved"></span>
+      <button class="icon-btn reset-btn" id="btnResetTop" type="button">Làm mới</button>
       <button class="icon-btn" id="btnMenu" type="button" aria-label="Danh sách hạng mục">Danh sách</button>
     </div>
-    <div class="top-sec" id="topSec"></div>
+    <div class="top-row2"><span class="top-sec" id="topSec"></span><span class="saved" id="saved"></span></div>
     <div class="bar"><i id="barFill"></i></div>
   </header>
   <main id="main"></main>
@@ -254,7 +255,7 @@ const KV = {
   async set(k,v){ const db=await this.open(); return new Promise((res,rej)=>{ const t=db.transaction("kv","readwrite"); t.objectStore("kv").put(v,k); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); }); },
 };
 let saveTimer=null;
-function save(){ clearTimeout(saveTimer); $("saved").textContent="Đang lưu…"; saveTimer=setTimeout(async()=>{ try{ await KV.set("state",S); $("saved").textContent="Đã lưu "+hm(new Date()); }catch(e){ $("saved").textContent="Không lưu được nháp"; } },500); }
+function save(edit){ if(edit!==false) S.lastEdit=Date.now(); clearTimeout(saveTimer); $("saved").textContent="Đang lưu…"; saveTimer=setTimeout(async()=>{ try{ await KV.set("state",S); $("saved").textContent="Đã lưu "+hm(new Date()); }catch(e){ $("saved").textContent="Không lưu được nháp"; } },500); }
 
 /* ===================== TIỆN ÍCH ===================== */
 function $(id){return document.getElementById(id)}
@@ -339,7 +340,7 @@ function finalResult(it){
 
 /* ===================== RENDER ===================== */
 const main=$("main");
-function go(i){ S.cur=Math.max(0,Math.min(TOTAL-1,i)); save(); render(); main.scrollTop=0; }
+function go(i){ S.cur=Math.max(0,Math.min(TOTAL-1,i)); save(false); render(); main.scrollTop=0; }
 function render(){
   const i=S.cur;
   $("stepCount").innerHTML= i===0? "Thông tin chung" : i===TOTAL-1? "Tổng kết" : "Bước "+i+" <small>/ "+ITEMS.length+"</small>";
@@ -355,16 +356,14 @@ function render(){
 function renderInfo(){
   main.innerHTML = `<div class="head"><h1>Nhập thông tin chung</h1><p class="hint">Mục có dấu * là bắt buộc.</p></div>
   <div class="block" id="infoForm">${INFO_FIELDS.map(([k,l,r])=>`<label class="f" for="in_${k}"><span>${esc(l)}${r?" <em>*</em>":""}</span><input class="inp" id="in_${k}" data-k="${k}" ${k==="power"?'inputmode="decimal"':""} value="${esc(S.info[k]||"")}" autocomplete="off"></label>`).join("")}</div>
-  <p class="hint">Dữ liệu tự lưu nháp trên máy này, tắt trình duyệt không bị mất.</p>
-  <button class="btn danger" type="button" id="btnReset">Tạo phiên kiểm tra mới</button>`;
+  <p class="hint">Dữ liệu tự lưu nháp trên máy này, tắt trình duyệt không bị mất.</p>`;
   main.querySelectorAll("#infoForm input").forEach(inp=>inp.addEventListener("input",()=>{S.info[inp.dataset.k]=inp.value;inp.classList.remove("err");save();}));
-  $("btnReset").onclick=()=>confirmBox("Xóa toàn bộ dữ liệu và ảnh của phiên hiện tại để bắt đầu phiên mới?","Xóa và tạo mới",()=>{S=blank();save();render();toast("Đã tạo phiên mới");});
 }
 
 function critHTML(it){
   return `<div class="crit">
-   <details class="crit-box ok" open><summary>ĐẠT NẾU</summary><ul>${it.pass.map(x=>"<li>"+esc(x)+"</li>").join("")}</ul></details>
-   <details class="crit-box bad"><summary>KHÔNG ĐẠT NẾU</summary><ul>${it.fail.map(x=>"<li>"+esc(x)+"</li>").join("")}</ul></details></div>
+   <div class="crit-box ok"><div class="crit-h">ĐẠT NẾU</div><ul>${it.pass.map(x=>"<li>"+esc(x)+"</li>").join("")}</ul></div>
+   <div class="crit-box bad"><div class="crit-h">KHÔNG ĐẠT NẾU</div><ul>${it.fail.map(x=>"<li>"+esc(x)+"</li>").join("")}</ul></div></div>
    ${it.req?`<div class="req"><b>Yêu cầu</b><span>${esc(it.req)}</span></div>`:""}`;
 }
 
@@ -521,9 +520,9 @@ function openMenu(){
   d.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{close();go(+b.dataset.go);});
   const cur=d.querySelector(".cur"); if(cur) cur.scrollIntoView({block:"center"});
 }
-function confirmBox(msg,okText,onOk){
+function confirmBox(msg,okText,onOk,warn){
   const m=document.createElement("div"); m.className="modal";
-  m.innerHTML=`<div class="scrim"></div><div class="box" role="dialog" aria-modal="true"><b>Xác nhận</b><p>${esc(msg)}</p><div class="row"><button class="btn ghost" type="button" data-x>Hủy</button><button class="btn danger" type="button" data-ok>${esc(okText)}</button></div></div>`;
+  m.innerHTML=`<div class="scrim"></div><div class="box" role="dialog" aria-modal="true"><b>Xác nhận</b><p>${esc(msg)}</p>${warn?`<p class="warn">${esc(warn)}</p>`:""}<div class="row"><button class="btn ghost" type="button" data-x>Hủy</button><button class="btn danger" type="button" data-ok>${esc(okText)}</button></div></div>`;
   document.body.appendChild(m); m.querySelector(".scrim").onclick=()=>m.remove(); m.querySelector("[data-x]").onclick=()=>m.remove();
   m.querySelector("[data-ok]").onclick=()=>{m.remove();onOk();};
 }
@@ -624,10 +623,10 @@ async function exportPdf(){
 async function savePdf(blob,name){
   if(window.claude && typeof window.claude.use==="function"){
     const dl=await window.claude.use("downloads");
-    if(dl){ try{ await dl.save({filename:name,data:blob}); toast("Đã lưu "+name); }catch(e){ toast(e&&e.code==="declined"?"Đã hủy lưu file":"Không lưu được: "+(e&&(e.message||e.code))); } return; }
+    if(dl){ try{ await dl.save({filename:name,data:blob}); markExported(); toast("Đã lưu "+name); }catch(e){ toast(e&&e.code==="declined"?"Đã hủy lưu file":"Không lưu được: "+(e&&(e.message||e.code))); } return; }
   }
   const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),60000); toast("Đã tạo "+name);
+  setTimeout(()=>URL.revokeObjectURL(url),60000); markExported(); toast("Đã tạo "+name);
 }
 
 /* ===================== ĐIỀU HƯỚNG ===================== */
@@ -638,10 +637,19 @@ $("btnNext").onclick=()=>{
   go(S.cur+1);
 };
 $("btnMenu").onclick=openMenu;
+function markExported(){ S.lastExport=Date.now(); save(false); }
+$("btnResetTop").onclick=()=>{
+  const c=counts(), done=c.dat+c.kdat+c.na, photos=ITEMS.reduce((a,it)=>a+S.items[it.id].photos.length,0);
+  const infoN=Object.values(S.info).filter(v=>String(v||"").trim()).length;
+  const hasData= done>0 || photos>0 || infoN>0;
+  const msg="Bạn có chắc chắn muốn làm mới?\nToàn bộ thông tin chung, số đo, kết luận và ảnh của phiên hiện tại sẽ bị xóa, app quay về trang Thông tin chung.\n\nPhiên hiện tại: "+done+"/"+ITEMS.length+" mục đã kiểm, "+photos+" ảnh.";
+  const warn= hasData && !(S.lastExport && S.lastExport>=(S.lastEdit||0)) ? "Chưa xuất PDF sau lần chỉnh sửa cuối. Dữ liệu sẽ mất và không khôi phục được." : "";
+  confirmBox(msg,"Xóa và làm mới",()=>{ S=blank(); save(false); render(); main.scrollTop=0; toast("Đã làm mới, bắt đầu phiên kiểm tra mới"); },warn);
+};
 
 /* ===================== KHỞI ĐỘNG ===================== */
 render();
-(async()=>{ try{ const saved=await KV.get("state"); if(saved&&saved.items){ const b=blank(); Object.keys(b.items).forEach(k=>{ if(saved.items[k]) b.items[k]=Object.assign(b.items[k],saved.items[k]); }); b.info=saved.info||{}; b.cur=Math.min(saved.cur||0,TOTAL-1); b.created=saved.created||b.created; S=b; ITEMS.forEach(it=>normPhotos(it,S.items[it.id])); render(); $("saved").textContent="Đã mở lại nháp"; } }catch(e){} })();
+(async()=>{ try{ const saved=await KV.get("state"); if(saved&&saved.items){ const b=blank(); Object.keys(b.items).forEach(k=>{ if(saved.items[k]) b.items[k]=Object.assign(b.items[k],saved.items[k]); }); b.info=saved.info||{}; b.cur=Math.min(saved.cur||0,TOTAL-1); b.created=saved.created||b.created; b.lastEdit=saved.lastEdit; b.lastExport=saved.lastExport; S=b; ITEMS.forEach(it=>normPhotos(it,S.items[it.id])); render(); $("saved").textContent="Đã mở lại nháp"; } }catch(e){} })();
 window.__ups={S:()=>S,buildDoc,loadMeasureFonts,evaluate,ITEMS};
 })();
 </script>
