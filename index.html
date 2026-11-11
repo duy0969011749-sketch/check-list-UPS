@@ -406,8 +406,7 @@ function render(){
   $("btnPrev").disabled = i===0;
   $("btnNext").textContent = i===TOTAL-2? "Tổng kết" : i===TOTAL-1? "Xuất PDF" : "Tiếp";
   const isItem = i>0 && i<TOTAL-1; $("btnCam").hidden=!isItem; $("nav").classList.toggle("two",!isItem);
-  $("topSec").textContent = isItem? SECTIONS[ITEMS[i-1].sec] : i===0? "Checklist trước khi cấp điện UPS" : projLabel();
-  $("topSec").classList.toggle("plain", i===TOTAL-1);
+  $("topSec").textContent = isItem? SECTIONS[ITEMS[i-1].sec] : i===0? "Checklist trước khi cấp điện UPS" : "";
   updCam();
   if(i===0) renderInfo(); else if(i===TOTAL-1) renderSummary(); else renderItem(ITEMS[i-1]);
 }
