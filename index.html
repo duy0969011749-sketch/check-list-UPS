@@ -29,6 +29,8 @@ button,label.btn,summary{cursor:pointer;touch-action:manipulation}
 .step-count small{font-size:18px;opacity:.85}
 .top-row2{display:flex;align-items:center;gap:10px;min-width:0}
 .top-row2 .top-sec{flex:1;min-width:0}
+.top-sec.plain,.eyebrow.plain{text-transform:none;letter-spacing:0}
+.eyebrow.plain{font-size:15px}
 .icon-btn.reset-btn{margin-left:auto;background:#c62828;border-color:#fff;color:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25)}
 .icon-btn.reset-btn:active{background:#a31f1f}
 .saved{flex-shrink:0;font-size:13px;opacity:.9;text-align:right;white-space:nowrap}
@@ -404,7 +406,8 @@ function render(){
   $("btnPrev").disabled = i===0;
   $("btnNext").textContent = i===TOTAL-2? "Tổng kết" : i===TOTAL-1? "Xuất PDF" : "Tiếp";
   const isItem = i>0 && i<TOTAL-1; $("btnCam").hidden=!isItem; $("nav").classList.toggle("two",!isItem);
-  $("topSec").textContent = isItem? SECTIONS[ITEMS[i-1].sec] : i===0? "Checklist trước khi cấp điện UPS" : (S.info.project||"")+(S.info.ups?" · "+S.info.ups:"");
+  $("topSec").textContent = isItem? SECTIONS[ITEMS[i-1].sec] : i===0? "Checklist trước khi cấp điện UPS" : projLabel();
+  $("topSec").classList.toggle("plain", i===TOTAL-1);
   updCam();
   if(i===0) renderInfo(); else if(i===TOTAL-1) renderSummary(); else renderItem(ITEMS[i-1]);
 }
@@ -519,6 +522,7 @@ function updateVerdict(it){
 /* ===================== ẢNH ===================== */
 function phName(it,st){ st.seq=(st.seq||0)+1; return it.code+"_"+String(st.seq).padStart(2,"0"); }
 function normPhotos(it,st){ st.photos=(st.photos||[]).map(p=>{ if(typeof p==="string"){ return {name:phName(it,st),data:p}; } return p; }); }
+function projLabel(){ const pj=(S.info.project||"").trim(), u=(S.info.ups||"").trim(); return "Dự án: "+(pj||"(chưa nhập)")+" · UPS: "+(u||"(chưa nhập)"); }
 function updCam(){ const it=ITEMS[S.cur-1]; const n=it? S.items[it.id].photos.length:0; $("btnCam").textContent = n? "Chụp ảnh ("+n+")" : "Chụp ảnh"; }
 $("fileCam").addEventListener("change",e=>{ const it=ITEMS[S.cur-1]; if(it) onFiles(e,it); else e.target.value=""; });
 function renderThumbs(it){
@@ -551,7 +555,7 @@ function renderSummary(){
   const missing=INFO_FIELDS.filter(f=>f[2]&&!(S.info[f[0]]||"").trim());
   const photos=ITEMS.reduce((s,it)=>s+S.items[it.id].photos.length,0);
   const row=it=>{const r=finalResult(it);return `<button type="button" data-go="${ITEMS.indexOf(it)+1}"><span class="c">${it.code}</span><span>${esc(it.title)}</span><span class="dot ${r}"></span></button>`;};
-  main.innerHTML=`<div class="head"><div class="eyebrow">${esc(S.info.project||"Chưa nhập tên dự án")} · ${esc(S.info.ups||"Chưa nhập tên UPS")}</div><h1>Tổng kết kiểm tra</h1></div>
+  main.innerHTML=`<div class="head"><div class="eyebrow plain">${esc(projLabel())}</div><h1>Tổng kết kiểm tra</h1></div>
    <div class="stats"><div class="stat dat"><b>${c.dat}</b><span>Đạt</span></div><div class="stat kdat"><b>${c.kdat}</b><span>Không đạt</span></div><div class="stat na"><b>${c.na}</b><span>N/A</span></div><div class="stat cho"><b>${c.cho}</b><span>Chưa kiểm</span></div></div>
    <p class="hint">Tổng ${ITEMS.length} hạng mục, ${photos} ảnh.</p>
    ${missing.length?`<div class="note-warn">Thiếu thông tin chung: ${missing.map(f=>esc(f[1])).join(", ")}. <button class="linkbtn" type="button" data-go="0">Bổ sung</button></div>`:""}
